@@ -30,6 +30,18 @@ export async function POST(request: Request): Promise<NextResponse> {
             fs.writeFileSync(filePath, JSON.stringify(subdomains, null, 2));
         }
 
+        // Check if the subdomain already exists
+        const subdomainExists = subdomains.some(
+            (entry) => entry.subdomain === subdomain
+        );
+
+        if (subdomainExists) {
+            return NextResponse.json(
+                { error: 'Subdomain already exists' },
+                { status: 400 }
+            );
+        }
+
         // Add the new subdomain
         subdomains.push({ subdomain });
 
