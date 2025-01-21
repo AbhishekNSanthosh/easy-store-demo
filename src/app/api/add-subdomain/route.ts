@@ -10,7 +10,6 @@ export async function POST(request: Request): Promise<NextResponse> {
     try {
         const { subdomain }: Subdomain = await request.json();
 
-        // Check if subdomain is provided
         if (!subdomain) {
             return NextResponse.json(
                 { error: 'Subdomain is required' },
@@ -18,29 +17,23 @@ export async function POST(request: Request): Promise<NextResponse> {
             );
         }
 
-        // Define the path to the subdomains JSON file
-        const filePath = path.join(process.cwd(), '/tmp/subdomains.json');
+        // Use the /tmp directory for storing the subdomains file
+        const filePath = '/tmp/subdomains.json'; // Temporary file location in Vercel
 
-        // Read the file containing existing subdomains
-        const fileData = fs.readFileSync(filePath, 'utf8');
-        const subdomains: Subdomain[] = JSON.parse(fileData);
-
-        // Check if the subdomain already exists
-        const subdomainExists = subdomains.some(
-            (existingSubdomain) => existingSubdomain.subdomain === subdomain
-        );
-
-        if (subdomainExists) {
-            return NextResponse.json(
-                { error: 'Subdomain already exists' },
-                { status: 400 }
-            );
+        // Check if the file exists, if not, create it with an empty array
+        let subdomains: Subdomain[] = [];
+        if (fs.existsSync(filePath)) {
+            const fileData = fs.readFileSync(filePath, 'utf8');
+            subdomains = JSON.parse(fileData);
+        } else {
+            // If file doesn't exist, initialize with an empty array
+            fs.writeFileSync(filePath, JSON.stringify(subdomains, null, 2));
         }
 
-        // Add the new subdomain to the list
+        // Add the new subdomain
         subdomains.push({ subdomain });
 
-        // Write the updated list back to the file
+        // Write the updated list of subdomains back to /tmp/subdomains.json
         fs.writeFileSync(filePath, JSON.stringify(subdomains, null, 2));
 
         return NextResponse.json(
@@ -48,11 +41,9 @@ export async function POST(request: Request): Promise<NextResponse> {
             { status: 200 }
         );
     } catch (error) {
-        // Log the error and return a generic error message to the client
-        console.error('Error adding subdomain:', error);
-
+        console.error(error);
         return NextResponse.json(
-            { error: 'An unexpected error occurred', data:error },
+            { error: 'An unexpected error occurred' },
             { status: 500 }
         );
     }
