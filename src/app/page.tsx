@@ -15,10 +15,12 @@ export default function Home() {
       body: JSON.stringify({ subdomain }),
     });
 
+    const data = await response.json();
+    console.log(data)
     if (response.ok) {
-      alert("Subdomain added successfully!");
+      alert(data?.message);
     } else {
-      alert("Failed to add subdomain");
+      alert(data?.error);
     }
 
     setSubdomain("");

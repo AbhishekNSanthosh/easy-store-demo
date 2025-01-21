@@ -3,29 +3,57 @@ import fs from 'fs';
 import path from 'path';
 
 interface Subdomain {
-  subdomain: string;
+    subdomain: string;
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
-  const { subdomain }: Subdomain = await request.json();
+    try {
+        const { subdomain }: Subdomain = await request.json();
 
-  if (!subdomain) {
-    return NextResponse.json(
-      { error: 'Subdomain is required' },
-      { status: 400 }
-    );
-  }
+        // Check if subdomain is provided
+        if (!subdomain) {
+            return NextResponse.json(
+                { error: 'Subdomain is required' },
+                { status: 400 }
+            );
+        }
 
-  const filePath = path.join(process.cwd(), 'subdomains.json');
-  const fileData = fs.readFileSync(filePath, 'utf8');
-  const subdomains: Subdomain[] = JSON.parse(fileData);
+        // Define the path to the subdomains JSON file
+        const filePath = path.join(process.cwd(), 'subdomains.json');
 
-  subdomains.push({ subdomain });
+        // Read the file containing existing subdomains
+        const fileData = fs.readFileSync(filePath, 'utf8');
+        const subdomains: Subdomain[] = JSON.parse(fileData);
 
-  fs.writeFileSync(filePath, JSON.stringify(subdomains, null, 2));
+        // Check if the subdomain already exists
+        const subdomainExists = subdomains.some(
+            (existingSubdomain) => existingSubdomain.subdomain === subdomain
+        );
 
-  return NextResponse.json(
-    { message: 'Subdomain added successfully' },
-    { status: 200 }
-  );
+        if (subdomainExists) {
+            return NextResponse.json(
+                { error: 'Subdomain already exists' },
+                { status: 400 }
+            );
+        }
+
+        // Add the new subdomain to the list
+        subdomains.push({ subdomain });
+
+        // Write the updated list back to the file
+        fs.writeFileSync(filePath, JSON.stringify(subdomains, null, 2));
+
+        return NextResponse.json(
+            { message: 'Subdomain added successfully' },
+            { status: 200 }
+        );
+    } catch (error) {
+        // Log the error and return a generic error message to the client
+        console.error('Error adding subdomain:', error);
+
+        return NextResponse.json(
+            { error: 'An unexpected error occurred' },
+            { status: 500 }
+        );
+    }
 }
