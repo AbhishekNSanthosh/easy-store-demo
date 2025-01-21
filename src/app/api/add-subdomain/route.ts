@@ -52,7 +52,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         console.error('Error adding subdomain:', error);
 
         return NextResponse.json(
-            { error: 'An unexpected error occurred' },
+            { error: 'An unexpected error occurred', data:error },
             { status: 500 }
         );
     }
