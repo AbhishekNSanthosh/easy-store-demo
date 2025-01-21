@@ -19,7 +19,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         }
 
         // Define the path to the subdomains JSON file
-        const filePath = path.join(process.cwd(), 'subdomains.json');
+        const filePath = path.join(process.cwd(), '/tmp/subdomains.json');
 
         // Read the file containing existing subdomains
         const fileData = fs.readFileSync(filePath, 'utf8');
