@@ -13,7 +13,7 @@ export default async function middleware(req: Request) {
 
   // Define list of allowed domains
   // (including localhost and your deployed domain)
-  const allowedDomains = ["localhost:3000", "trillionclues.com.com", "midnitcode.in"];
+  const allowedDomains = ["localhost:3000", "trillionclues.com.com", "midnitcode.in","https://midnitcode.in/"];
 
   // Check if the current hostname is in the list of allowed domains
   const isAllowedDomain = allowedDomains.some(domain => hostname.includes(domain));
